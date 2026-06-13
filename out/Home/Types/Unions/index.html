@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<head>
+    <style>body {
+    display: flex;
+    background-color: #111;
+    font-family: sans-serif;
+    color: #ccc;
+    gap:1em;
+    margin: 1em;
+    min-height: calc(100dvh - 2em);
+    justify-content: center;
+}
+
+code {
+    font-family: "JetBrains Mono NL", monospace;
+}
+
+pre {
+    width: fit-content;
+    padding: 1em;
+    border-radius: 1em;
+    line-height: 1.25em;
+    white-space: pre-wrap;
+    background-color: #1e1e1e;
+    color: #bbbbbb;
+}
+
+:not(pre) > code {
+    background-color: #1e1e1e;
+    padding: 0.125em;
+}
+
+h1 {
+    font-size: 3em;
+    margin: 0;
+}
+h1, h2, h3 {
+    margin-left: -1rem;
+}
+
+em {
+    text-decoration: underline;
+}
+
+aside {
+    min-width: max-content;
+    padding: 1em;
+    background-color: #222;
+}
+
+main {
+    padding: 1em 1em 1em 2em;
+    background-color: #222;
+    width: 120ch;
+}
+
+.keyword {
+    color: #cf8e6d;
+}
+
+.type {
+    color: #6fafbd
+}
+
+.constant {
+    color: #c77dbb
+}
+
+.string {
+    color: #6aab73
+}
+
+.number {
+    color: #2aacb8
+}
+
+.comment {
+    color: #7a7e85
+}
+
+.call {
+    color: #56a8f5
+}
+
+a {
+    color: cornflowerblue;
+    &:visited {
+        color:#dba3ed;
+    }
+}</style>
+</head>
+<body>
+    <aside>
+    <a href="/">Home</a>
+<ul>
+<li>
+<span>Control Flow</span>
+<ul>
+<li>
+<a href="/Control Flow/If Statements/">If Statements</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Control Flow/Switch Statements/">Switch Statements</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<span>Misc</span>
+<ul>
+<li>
+<a href="/Misc/Optional-Ok Semantics/">Optional-Ok Semantics</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Zero Values/">Zero Values</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="/Reflection/">Reflection</a>
+<ul>
+</ul>
+</li>
+<li>
+<span>Types</span>
+<ul>
+<li>
+<a href="/Types/Parametric Polymorphism/">Parametric Polymorphism</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Unions/">Unions</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </aside>
+    <main>
+    <h1 id="unions">Unions</h1><p>Unions are a way to create one type that's composed of multiple different types.</p><pre><code>Int_Or_String :: union {
+    int, string
+}
+
+an_int := Int_Or_String(123)
+a_string := Int_Or_String("Hello")
+
+// Reassignment works fine
+both := an_int
+both = a_string
+</code></pre><p>There's also an implicit cast from a variant of a union to the union</p><pre><code>my_val: Int_Or_String
+my_val = 123
+my_val = "hello"
+</code></pre><p>All unions include a "nil variant", unless <a href="#directives">otherwise specified</a>. Unions store a tag to represent which variant is currently active, and 0 represents the nil variant. Variants count up from there, so 1 represents the first named type, 2 the second, etc. The type of the tag is the smallest integer that can hold all values. There is no way to customize the tag used for the union.</p><p>The tag can be read and modified directly using <a href="/Reflection">Reflection</a>.</p><p>Corrupted tags are <em>not</em> considered UB in Odin. This means that a <a href="#type-switches">type switch</a> which checks all named variants of a union does not count as exhaustive. Consider a catchall <code>case</code> block, or simply handle the corrupted case after the switch</p><p>If the union contains <em>exactly one variant, which is a pointer</em>, then the union is not tagged. Instead, the nil pointer represents the nil union. This means there is <em>no way</em> to represent a non-nil union holding a nil pointer. You will need to use an intermediary struct.</p><p>There is no way to provide alternate names to the variants, they are always referred to by their types.</p><p>Unions can have <a href="/Types/Parametric%20Polymorphism">Type Parameters</a></p><h2 id="type-assertions">Type Assertions</h2><p>To pull a value out of a union, use a Type Assertion:</p><pre><code>my_val := Int_Or_String(123)
+
+as_int := my_val.(int)
+</code></pre><p>If you use an incorrect type, the assertion will fail</p><pre><code>my_val := Int_Or_String(123)
+
+// Assertion failure, program crash
+as_int := my_val.(string)
+</code></pre><p>Type Assertions support <a href="/Misc/Optional-Ok%20Semantics">optional-ok semantics</a>, so you can do a non-crashing check using an additional variable:</p><pre><code>my_val := Int_Or_String(123)
+as_int, is_int := my_val.(int) // is_int == true
+as_str, is_str := my_val.(string) // is_str == false
+</code></pre><p>If the union isn't holding the asserted type, the extracted value will be that types <a href="/Misc/Zero%20Values">zero value</a>.</p><h2 id="type-switches">Type Switches</h2><p>Sometimes, you want to have different behavior based on which variant the union is holding. A giant chain if two-part if/elses would get out of hand quick, so that's why there's Type Switches, which are a union version of a <a href="/Control%20Flow/Switch%20Statements">Switch Statement</a></p><pre><code>my_val := Int_Or_String(123)
+
+switch t in my_val {
+   case int: fmt.println("It's an int!") 
+   case string: fmt.println("It's a string!") 
+}
+</code></pre><p>Here, <code>t</code> is a variable representing the actual data inside the union. It's downcast to the actual type inside of a case. If you have multiple types inside of one case, <code>t</code> is not downcast:</p><pre><code>switch t in something {
+   case int: assert(type_of(t) == int)
+   case string: assert(type_of(t) == string)
+   case f32, f64: assert(type_of(t) == type_of(something))
+}
+</code></pre><p><code>fallthrough</code> is not allowed inside a type switch.</p><h2 id="directives">Directives</h2><p>The following directives apply to unions:</p><ul><li><p><code>#align(N)</code>: Aligns this type to N bytes.</p></li><li><p><code>#no_nil</code>: Removes the nil variant of this union. The zero value is now the first variant.</p></li><li><p><code>#shared_nil</code>: The <code>nil</code> of all types within the union represent the <code>nil</code> variant of the union itself. This does not prevent invalid tags. This is only allowed if every variant can be represented using the <code>nil</code> keyword specifically. <code>#no_nil</code> and <code>#shared_nil</code> are mutually exclusive, so a <code>union</code> cannot have both.</p></li><li><p><code>#maybe</code>: Removed functionality that has been merged with standard <code>union</code>s.</p></li></ul>
+    </main>
+</body>
