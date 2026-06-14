@@ -124,6 +124,16 @@ a {
 </ul>
 </li>
 <li>
+<a href="/Procedures/">Procedures</a>
+<ul>
+<li>
+<a href="/Procedures/Builtin Procedures/">Builtin Procedures</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
 <a href="/Reflection/">Reflection</a>
 <ul>
 </ul>
@@ -131,6 +141,11 @@ a {
 <li>
 <span>Types</span>
 <ul>
+<li>
+<a href="/Types/Maps/">Maps</a>
+<ul>
+</ul>
+</li>
 <li>
 <a href="/Types/Parametric Polymorphism/">Parametric Polymorphism</a>
 <ul>
@@ -147,6 +162,33 @@ a {
 
     </aside>
     <main>
-    <h1 id="optional-ok-semantics">Optional-Ok Semantics</h1><p>TODO</p>
+    <h1 id="optional-ok-semantics">Optional-Ok Semantics</h1><p>Some expressions, such as <a href="/Types/Maps">map</a> accesses, <a href="/Types/Unions">union</a> type assertions, and some <a href="/Procedures">procedure</a> calls, have "Optional-Ok Semantics." This means that when the values is stored in some variables, you're able to omit the second value (the "ok" value).</p><p>For procedures, the <code>#optional_ok</code> directive allows you to ignore the second return value, which must be a bool. The procedure must have exactly 2 return values. Procedures can also be tagged with <code>#optional_allocator_error</code>, which has the same behavior, except it requires a <code>runtime.Allocator_Error</code> as the second return type, rather than a <code>bool</code>.</p><p>Example:</p><pre><code>get_at :: proc(data: []int, index: int) -> (int, bool) #optional_ok {
+    if index < 0 || index >= len(data) {
+        return 0, false
+    }
+
+    return data[index], true
+}
+
+my_numbers := []int{1,2,3}
+value, exists := get_at(my_numbers, 2) // 3, true
+value, exists := get_at(my_numbers, 5) // 0, false
+value := get_at(my_numbers, 5)         // 0
+</code></pre><h2 id="specific-behavior">Specific Behavior</h2><p>The exact behavior depends on what the expression is.</p><h3 id="unions">Unions</h3><p>If you ignore the ok value of a union type assertion, an <a href="/Procedures/Builtin%20Procedures#assert">assertion</a> failure is triggered when the asserted variant doesn't match the actual one.</p><p>Example:</p><pre><code>My_Union :: union {
+    int, string
+}
+
+val := My_Union(123)
+
+// Assertion failure triggered
+as_string := val.(string)
+
+// No failure, ok == false
+as_string, ok := val.(string)
+</code></pre><h3 id="maps">Maps</h3><p>If you ignore the ok value of a map access, you silently get the <a href="/Misc/Zero%20Values">zero value</a> of the map. This does <em>not</em> insert the key if it wasn't present. Consider <a href="/Procedures/Builtin%20Procedures#map_entry">map_entry</a> for this purpose.</p><p>Example:</p><pre><code>my_map: map[string]int
+val, ok := my_map["123"] // val == 0, ok == false
+val := my_map["123"] // val == 0
+assert("123" not_in my_map) // not inserted still
+</code></pre><h3 id="procedures">Procedures</h3><p>When an ok value is ignored in a procedure call, nothing special happens. The procedure still runs as normal.</p>
     </main>
 </body>
