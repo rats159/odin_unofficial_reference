@@ -136,6 +136,11 @@ a {
 <li>
 <a href="/Reflection/">Reflection</a>
 <ul>
+<li>
+<a href="/Reflection/Any/">Any</a>
+<ul>
+</ul>
+</li>
 </ul>
 </li>
 <li>
@@ -162,6 +167,30 @@ a {
 
     </aside>
     <main>
-    <h1 id="switch-statements">Switch Statements</h1><p>TODO</p>
+    <h1 id="switch-statements">Switch Statements</h1><p>Switch statements allow you to concisely compare a value against a series of other values. The basic syntax is this:</p><pre><code>switch x {
+    case 1:
+        fmt.println("It's 1")
+    case 2:
+        fmt.println("It's 2")
+    case 3:
+        fmt.println("It's 3")
+    case 4:
+        fmt.println("It's 4")
+    case:
+        fmt.println("It's something else!")
+}
+</code></pre><p>If you want a catchall case, simply use <code>case</code> without an expression.</p><p>There is no need for <code>break</code> after every case like in C. Fallthrough is explicit in Odin, so use the <code>fallthrough</code> keyword if you need that behavior.</p><p>Cases do not need to be constant values:</p><pre><code>compare :: proc(x, y: int) {
+  switch x {
+    case y: runtime.print_string("Equal!")
+    case 3: runtime.print_string("Three!")
+    case: runtime.print_string("Something else")
+  }
+}
+</code></pre><p>If a case is a non-constant expression, it will be evaluated every time <em>that case</em> is checked</p><h2 id="optimization">Optimization</h2><p>If possible, the switch will be transformed into a jump table. This can generally happen when all cases are constant integer values. Otherwise, the switch is equivalent to an if/else chain. The order of case checks is guaranteed in this case. That means that some case orderings may be more optimal than others, e.g. you may want to place all static checks before any expensive dynamic checks.</p><h2 id="expressionless-switch">Expressionless Switch</h2><p>You may omit the check expression from your <code>switch</code> statement, which gives you a compact way to write several conditions. It's equivalent to <code>switch true</code>, meaning each case is checked for truthiness.</p><p>Example:</p><pre><code>switch {
+    case a == b: print("Equal!")
+    case a < b:  print("A less")
+    case a > b:  print("A greater")
+}
+</code></pre><h2 id="type-switch">Type Switch</h2><p>See the <a href="/Types/Unions/#type-switches">Unions Page</a> and the <a href="/Reflection/Any/#type-switches">Any Page</a></p>
     </main>
 </body>
