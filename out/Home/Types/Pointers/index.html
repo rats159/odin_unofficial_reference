@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<head>
+    <style>body {
+    display: flex;
+    background-color: #111;
+    font-family: sans-serif;
+    color: #ccc;
+    gap:1em;
+    margin: 1em;
+    min-height: calc(100dvh - 2em);
+    justify-content: center;
+}
+
+code {
+    font-family: "JetBrains Mono NL", monospace;
+}
+
+pre {
+    width: fit-content;
+    padding: 1em;
+    border-radius: 1em;
+    line-height: 1.25em;
+    white-space: pre-wrap;
+    background-color: #1e1e1e;
+    color: #bbbbbb;
+}
+
+:not(pre) > code {
+    background-color: #1e1e1e;
+    padding: 0.125em;
+}
+
+h1 {
+    font-size: 3em;
+    margin: 0;
+}
+h1, h2, h3 {
+    margin-left: -1rem;
+}
+
+em {
+    text-decoration: underline;
+}
+
+aside {
+    min-width: max-content;
+    padding: 1em;
+    background-color: #222;
+}
+
+main {
+    padding: 1em 1em 1em 2em;
+    background-color: #222;
+    width: 120ch;
+}
+
+.keyword {
+    color: #cf8e6d;
+}
+
+.type {
+    color: #6fafbd
+}
+
+.constant {
+    color: #c77dbb
+}
+
+.string {
+    color: #6aab73
+}
+
+.number {
+    color: #2aacb8
+}
+
+.comment {
+    color: #7a7e85
+}
+
+.call {
+    color: #56a8f5
+}
+
+a {
+    color: cornflowerblue;
+    &:visited {
+        color:#dba3ed;
+    }
+}</style>
+</head>
+<body>
+    <aside>
+    <a href="/">Home</a>
+<ul>
+<li>
+<span>Control Flow</span>
+<ul>
+<li>
+<a href="/Control Flow/If Statements/">If Statements</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Control Flow/Loops/">Loops</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Control Flow/Switch Statements/">Switch Statements</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<span>Misc</span>
+<ul>
+<li>
+<a href="/Misc/Context/">Context</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Optional-Ok Semantics/">Optional-Ok Semantics</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Transmute/">Transmute</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Zero Values/">Zero Values</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="/Procedures/">Procedures</a>
+<ul>
+<li>
+<a href="/Procedures/Builtin Procedures/">Builtin Procedures</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="/Reflection/">Reflection</a>
+<ul>
+<li>
+<a href="/Reflection/Any/">Any</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="/Types/">Types</a>
+<ul>
+<li>
+<a href="/Types/Bit Sets/">Bit Sets</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Builtin Types/">Builtin Types</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Dynamic Arrays/">Dynamic Arrays</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Enums/">Enums</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Maps/">Maps</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Parametric Polymorphism/">Parametric Polymorphism</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Pointers/">Pointers</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Procedures/">Procedures</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Slices/">Slices</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Unions/">Unions</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </aside>
+    <main>
+    <h1 id="pointers">Pointers</h1><p>A pointer is an integer value representing a memory address. You can take the address of a value using the address-of operator <code>&</code>. A pointer to some type <code>T</code> is represented as <code>^T</code>. This can be nested as much as you want, so <code>^^^^^T</code> is a perfectly valid type. If you want to get the value out of a pointer , use the dereference operator <code>^</code>, placed after the expression. This follows Odin's general rule of modifiers on the left and "undoing" those modifiers on the right.</p><p>Example:</p><pre><code>my_number: int = 123
+my_pointer: ^int = &my_number
+
+assert(my_number == my_pointer^)
+</code></pre><p>A dereference is a valid assignment target, which means you can use a pointer to pass around a value that can be modified, e.g.</p><pre><code>double_int :: proc(x: ^int) {
+    x^ = x * 2
+}
+
+x := 5
+double_int(&x)
+assert(x == 10)
+</code></pre><p>Not every expression can have its address taken, here are a few common cases and their solutions:</p><ul><li><p>Procedure parameters can't be addressed, mostly to prevent bugs. If you really do want to take the address <em>of the parameter</em>, make a local copy in the function via <a href="/Procedures#shadowing">shadowing</a>. If you want the address of the thing originally passed in, convert the parameter to a pointer and modify the calling code accordingly.</p></li><li><p>Simple literals (such as numbers) can't be addressed, because they don't necessarily have one (they may be in registers, or be optimzed away entirely). Store the literal in a variable first.</p></li><li><p>Context can't be addressed because of the way it's passed around, and to prevent it being "hijacked". Make a local copy like <code>ctx := context</code> and use that. For more details, see <a href="/Misc/Context">Context</a>.</p></li></ul><p><a href="/Types#compound-literals">Compound literals</a> can be addressed, so <code>&Foo{}</code> is perfectly valid.</p><h2 id="multipointers">Multipointers</h2><p>A multipointer is a pointer that can be indexed, with behavior like C. A multipointer type is written as <code>[^]T</code>. Multipointers are used most commonly when interfacing with C, but are sometimes found in other places. The most common way to get a multipointer is using the <a href="/Procedures/Builtin%20Procedures/#raw-data"><code>raw_data</code></a> builtin procedure, but they can also be created directly with <a href="/Procedures/Builtin%20Procedures/#make"><code>make</code></a>.</p><p>Multipointers can be <a href="/Types/Slices/#slicing-operator">sliced</a>, which will either give back another multipointer or a <a href="/Types/Slices">Slice</a>, depending on whether or not you provide a length.</p><p>Example:</p><pre><code>my_data: [^]int = make([^]int, 10)
+// A slice, because it has a length
+my_slice: []int = my_data[:10]
+// A multipointer, because there's no length
+my_data_again: [^]int = my_data[:]
+</code></pre><p>Multipointers are the primary alternative to pointer arithmatic or pointer math in C. Here's an example of C code and equivalent Odin code:</p><pre><code>const char *str = "Hello";
+
+for (char *ptr = str; *ptr != 0; ptr++) {}
+</code></pre><pre><code>str: cstring = "Hello"
+for ptr := transmute([^]u8)str; ptr[0] != 0; ptr = ptr[1:] {}
+</code></pre><p>For more info about features used in this example, see <a href="/Types/Builtin%20Types/#cstrings">Cstrings</a>, <a href="/Misc/Transmute"><code>transmute</code></a>, <a href="/Control%20Flow/Loops">Loops</a></p><h2 id="rawptr">Rawptr</h2><p><a href="/Types/Builtin%20Types#rawptr">Main article</a></p><p><code>rawptr</code> is a pointer type representing a pointer to anything. It doesn't track what the type is that it's pointing to (for that, consider <a href="/Types/Builtin%20Types#any">Any</a>), so it's mainly used as a way to store unknown data. Most commonly it's used inside of callbacks from libraries, to allow you to pass as much arbitrary data into the callback as you want. It's equivalent to <code>void *</code> in C.</p><h2 id="uintptr">Uintptr</h2><p><code>uintptr</code> isn't necessarily a pointer type, but a pointer-sized integer type. While the difference is subtle, <code>uintptr</code> cannot be assigned <code>nil</code>, and supports integer operations such as <code>+</code> and <code>-</code>. It can, however, be cast to and from most pointer types, so it serves as the most fundamental form of pointer arithmatic in Odin.</p><h2 id="procedures">Procedures</h2><p><a href="/Types/Procedures">Procedure types</a> are automatically pointers, so storing one in a variable creates a procedure pointer. They can be cast to <code>rawptr</code> and to other procedure types, but nothing else. You cannot dereference a procedure.</p>
+    </main>
+</body>
