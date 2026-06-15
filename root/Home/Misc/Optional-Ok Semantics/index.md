@@ -1,5 +1,5 @@
 # Optional-Ok Semantics
-Some expressions, such as [map](/Types/Maps) accesses, [union](/Types/Unions) type assertions, and some [procedure](/Procedures) calls, have "Optional-Ok Semantics." This means that when the values is stored in some variables, you're able to omit the second value (the "ok" value). 
+Some expressions, such as [map](/Types/Maps) accesses, [union](/Types/Unions) and [any](/Types/Builtin%20Types/#any) type assertions, and some [procedure](/Procedures) calls, have "Optional-Ok Semantics." This means that when the values is stored in some variables, you're able to omit the second value (the "ok" value). 
 
 For procedures, the `#optional_ok` directive allows you to ignore the second return value, which must be a bool. The procedure must have exactly 2 return values. Procedures can also be tagged with `#optional_allocator_error`, which has the same behavior, except it requires a `runtime.Allocator_Error` as the second return type, rather than a `bool`.
 
@@ -22,7 +22,7 @@ value := get_at(my_numbers, 5)         // 0
 ## Specific Behavior
 The exact behavior depends on what the expression is.
 
-### Unions
+### Unions and Anys
 If you ignore the ok value of a union type assertion, an [assertion](/Procedures/Builtin%20Procedures#assert) failure is triggered when the asserted variant doesn't match the actual one.
 
 Example:

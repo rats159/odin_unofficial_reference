@@ -132,6 +132,11 @@ a {
 </ul>
 </li>
 <li>
+<a href="/Misc/Using/">Using</a>
+<ul>
+</ul>
+</li>
+<li>
 <a href="/Misc/Zero Values/">Zero Values</a>
 <ul>
 </ul>
@@ -217,6 +222,35 @@ a {
 
     </aside>
     <main>
-    <h1 id="any">Any</h1><p>TODO</p>
+    <h1 id="any">Any</h1><p>The <code>any</code> type is a builtin type primarily designed for use with reflection. Internally, its structure is very simple:</p><pre><code>Raw_Any :: struct {
+    data: rawptr,
+    id:   typeid
+}
+</code></pre><p>An <code>any</code>'s fields can be accessed directly, so <code>your_any.data</code> and <code>your_any.id</code> work fine to access those fields.</p><h3 id="when-not-to-use-any">When not to use Any</h3><ul><li><p>You want a struct to be able to hold any type. Consider <a href="/Types/Parametric%20Polymorphism">Parameteric Polymorphism</a></p></li><li><p>One value could be of a few different types. Consider <a href="/Types/Unions">Unions</a></p></li><li><p>You want inheritance-like behavior where one type contains another. Consider <a href="/Misc/Using">the Using keyword</a></p></li><li><p>You want dynamically typed code. Consider <a href="https://pkg.odin-lang.org/vendor/lua/5.4">not using Odin</a></p></li><li><p>You want a <code>userdata</code> pointer for a callback. Consider <a href="/Types/Pointers/#rawptr"><code>rawptr</code></a></p></li></ul><h3 id="when-to-use-any">When to use Any</h3><ul><li><p>Printing (sometimes)</p></li><li><p>Serialization (sometimes)</p></li><li><p>Metaprogramming (sometimes)</p></li></ul><p>It's always worth considering if you really need "any" type, determined at runtime, or if something simpler would work</p><h2 id="compound-literal">Compound Literal</h2><p>Anys can be created via <a href="/Types#compound-literals">Compound Literals</a>, just like a struct. This is most useful when doing complex reflection tasks, such as getting an <code>any</code> representing a field of an unknown struct.</p><pre><code>get_fields :: proc(val: any, inf: runtime.Type_Info_Struct) {
+    for i in 0..&ltinf.field_count {
+        field_address := rawptr(uintptr(val.data) + inf.offsets[i])
+        field_typeid := inf.types[i].id 
+        field_any := any{data = field_address, id = field_typeid}
+        do_something(field_any)
+    }
+}
+</code></pre><p>For practical usecases, check out <code>core:encoding/json</code>, which does this sort of thing a lot. Or just grep for <code>any\s?{</code> in core and see what you find.</p><h2 id="implicit-conversions">Implicit Conversions</h2><p>The main "magic" with any comes from implicit conversions. Every single type converts to <code>any</code> implicitly, with behavior like this:</p><pre><code>x: f32 = 123
+
+// These two are equivalent
+my_any_implicit: any = x
+my_any_explicit := any {data = &x, id = typeid_of(f32)}
+</code></pre><p>It's worth being careful about this. We're implicitly taking the address of a variable and storing it somewhere, which is always risky. Generally, <code>any</code>s should never be moved to higher scopes. A trivial example of a Use After Free hidden by <code>any</code>'s implicit behavior:</p><pre><code>make_an_any :: proc() -> any {
+    x := 10
+    return x // surprise! this returns the address of x
+}
+</code></pre><p><em><code>any</code> is allowed to break Odin's standard addressing rules!</em> It can take the address of literals, procedure parameters, <code>context</code>, and more.</p><h2 id="type-assertions">Type Assertions</h2><p>There's no way to make a variable that holds whatever type is inside an <code>any</code>, since that type is determined at runtime, and Odin has static typing. However, you are able to use the <a href="/Types/Unions/#type-assertions">Type Assertion</a> syntax from unions in a similar way.</p><pre><code>x: any = 123
+as_int := x.(int) // All good
+as_f32 := x.(f32) // Assertion failure, x.id != f32
+</code></pre><p>This behavior effectively compiles down to</p><pre><code>x: any = 123
+assert(x.id == typeid_of(int))
+as_int: int = (^int)(x.data)^
+assert(x.id == typeid_of(f32)) // This assertion fails
+as_f32: f32 = (^f32)(x.data)^
+</code></pre><p>Like with unions, these type assertions have <a href="/Misc/Optional-Ok%20Semantics">Optional-Ok Semantics</a>.</p><h2 id="type-switches">Type switches</h2><p><a href="/Types/Unions/#type-switches">Type switches</a> also work on <code>any</code>s. They follow the same rules as unions.</p>
     </main>
 </body>
