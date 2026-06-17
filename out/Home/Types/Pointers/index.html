@@ -127,6 +127,11 @@ a {
 </ul>
 </li>
 <li>
+<a href="/Misc/Shadowing/">Shadowing</a>
+<ul>
+</ul>
+</li>
+<li>
 <a href="/Misc/Transmute/">Transmute</a>
 <ul>
 </ul>
@@ -167,6 +172,11 @@ a {
 <a href="/Types/">Types</a>
 <ul>
 <li>
+<a href="/Types/Arrays/">Arrays</a>
+<ul>
+</ul>
+</li>
+<li>
 <a href="/Types/Bit Sets/">Bit Sets</a>
 <ul>
 </ul>
@@ -178,6 +188,11 @@ a {
 </li>
 <li>
 <a href="/Types/Dynamic Arrays/">Dynamic Arrays</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Enumerated Arrays/">Enumerated Arrays</a>
 <ul>
 </ul>
 </li>
@@ -233,7 +248,7 @@ assert(my_number == my_pointer^)
 x := 5
 double_int(&x)
 assert(x == 10)
-</code></pre><p>Not every expression can have its address taken, here are a few common cases and their solutions:</p><ul><li><p>Procedure parameters can't be addressed, mostly to prevent bugs. If you really do want to take the address <em>of the parameter</em>, make a local copy in the function via <a href="/Procedures#shadowing">shadowing</a>. If you want the address of the thing originally passed in, convert the parameter to a pointer and modify the calling code accordingly.</p></li><li><p>Simple literals (such as numbers) can't be addressed, because they don't necessarily have one (they may be in registers, or be optimzed away entirely). Store the literal in a variable first.</p></li><li><p>Context can't be addressed because of the way it's passed around, and to prevent it being "hijacked". Make a local copy like <code>ctx := context</code> and use that. For more details, see <a href="/Misc/Context">Context</a>.</p></li></ul><p><a href="/Types#compound-literals">Compound literals</a> can be addressed, so <code>&Foo{}</code> is perfectly valid.</p><h2 id="multipointers">Multipointers</h2><p>A multipointer is a pointer that can be indexed, with behavior like C. A multipointer type is written as <code>[^]T</code>. Multipointers are used most commonly when interfacing with C, but are sometimes found in other places. The most common way to get a multipointer is using the <a href="/Procedures/Builtin%20Procedures/#raw-data"><code>raw_data</code></a> builtin procedure, but they can also be created directly with <a href="/Procedures/Builtin%20Procedures/#make"><code>make</code></a>.</p><p>Multipointers can be <a href="/Types/Slices/#slicing-operator">sliced</a>, which will either give back another multipointer or a <a href="/Types/Slices">Slice</a>, depending on whether or not you provide a length.</p><p>Example:</p><pre><code>my_data: [^]int = make([^]int, 10)
+</code></pre><p>Not every expression can have its address taken, here are a few common cases and their solutions:</p><ul><li><p>Procedure parameters can't be addressed, mostly to prevent bugs. If you really do want to take the address <em>of the parameter</em>, make a local copy in the function via <a href="/Misc/Shadowing">shadowing</a>. If you want the address of the thing originally passed in, convert the parameter to a pointer and modify the calling code accordingly.</p></li><li><p>Simple literals (such as numbers) can't be addressed, because they don't necessarily have one (they may be in registers, or be optimzed away entirely). Store the literal in a variable first.</p></li><li><p>Context can't be addressed because of the way it's passed around, and to prevent it being "hijacked". Make a local copy like <code>ctx := context</code> and use that. For more details, see <a href="/Misc/Context">Context</a>.</p></li></ul><p><a href="/Types#compound-literals">Compound literals</a> can be addressed, so <code>&Foo{}</code> is perfectly valid.</p><h2 id="multipointers">Multipointers</h2><p>A multipointer is a pointer that can be indexed, with behavior like C. A multipointer type is written as <code>[^]T</code>. Multipointers are used most commonly when interfacing with C, but are sometimes found in other places. The most common way to get a multipointer is using the <a href="/Procedures/Builtin%20Procedures/#raw-data"><code>raw_data</code></a> builtin procedure, but they can also be created directly with <a href="/Procedures/Builtin%20Procedures/#make"><code>make</code></a>.</p><p>Multipointers can be <a href="/Types/Slices/#slicing-operator">sliced</a>, which will either give back another multipointer or a <a href="/Types/Slices">Slice</a>, depending on whether or not you provide a length.</p><p>Example:</p><pre><code>my_data: [^]int = make([^]int, 10)
 // A slice, because it has a length
 my_slice: []int = my_data[:10]
 // A multipointer, because there's no length

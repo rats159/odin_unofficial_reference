@@ -21,7 +21,7 @@ assert(x == 10)
 ```
 
 Not every expression can have its address taken, here are a few common cases and their solutions:
-- Procedure parameters can't be addressed, mostly to prevent bugs. If you really do want to take the address *of the parameter*, make a local copy in the function via [shadowing](/Procedures#shadowing). If you want the address of the thing originally passed in, convert the parameter to a pointer and modify the calling code accordingly.
+- Procedure parameters can't be addressed, mostly to prevent bugs. If you really do want to take the address *of the parameter*, make a local copy in the function via [shadowing](/Misc/Shadowing). If you want the address of the thing originally passed in, convert the parameter to a pointer and modify the calling code accordingly.
 - Simple literals (such as numbers) can't be addressed, because they don't necessarily have one (they may be in registers, or be optimzed away entirely). Store the literal in a variable first.
 - Context can't be addressed because of the way it's passed around, and to prevent it being "hijacked". Make a local copy like `ctx := context` and use that. For more details, see [Context](/Misc/Context).
 
