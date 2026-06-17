@@ -290,15 +290,23 @@ Three 3
 Other 3
 
 Other 4
-</code></pre><h2 id="return">Return</h2><p>The <code>return</code> keyword exits from the current procedure. You can return any number of values from a procedure. See <a href="/Procedures">Procedures</a> for more info.</p><h2 id="or_return">or_return</h2><p>The <code>or_return</code> keyword is a postfix operator. It takes a multi-valued expression, the last of which is either a <a href="/Types/#nilable-types">nilable type</a> or a <a href="/Types/Builtin%20Types/#booleans">Boolean type</a>, and returns if that value is non-nil or false.</p><p>It roughly desugars like this:</p><pre><code>foo := bar() or_return
-
-// for booleans
-foo, ok := bar()
-if !ok do return ok
-
-// for nilables
-foo, err := bar()
-if err != nil do return err
+</code></pre><h2 id="return">Return</h2><p>The <code>return</code> keyword exits from the current procedure. You can return any number of values from a procedure. See <a href="/Procedures">Procedures</a> for more info.</p><h2 id="or_return">or_return</h2><p>The <code>or_return</code> keyword is a postfix operator. It takes a multi-valued expression, the last of which is either a <a href="/Types/#nilable-types">nilable type</a> or a <a href="/Types/Builtin%20Types/#booleans">Boolean type</a>, and returns if that value is non-nil or false.</p><p>If the procedure returns only one value, then it simply returns that expression. If it returns more than one value, all values must be named. Then, it sets only the final value and returns.</p><p>It roughly desugars like this:</p><pre><code>foo :: proc() -> (_x: int, _err: Error) {
+	val := bar() or_return
+	
+	// for booleans
+	val, ok := bar()
+	if !ok {
+		_err = ok
+		return
+	}
+	
+	// for nilables
+	val, err := bar()
+	if err != nil {
+		_err = err
+		return
+	}
+}
 </code></pre><p>There is no way to configure what is returned, it always propagates from the expression attached to it.</p><h2 id="or_else">or_else</h2><p>The <code>or_else</code> keyword is a binary operator. It takes an n-valued expression on the left, the last of which is either a <a href="/Types/#nilable-types">nilable type</a> or a <a href="/Types/Builtin%20Types/#booleans">Boolean type</a>, and another n-1 valued expression, and evaluates to the first expression if the last value is nil or true, otherwise the second expression.</p><p>It roughly desugars like this:</p><pre><code>foo := bar() or_else 10
 
 // for booleans

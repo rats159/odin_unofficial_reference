@@ -91,17 +91,27 @@ The `return` keyword exits from the current procedure. You can return any number
 ## or_return
 The `or_return` keyword is a postfix operator. It takes a multi-valued expression, the last of which is either a [nilable type](/Types/#nilable-types) or a [Boolean type](/Types/Builtin%20Types/#booleans), and returns if that value is non-nil or false.
 
+If the procedure returns only one value, then it simply returns that expression. If it returns more than one value, all values must be named. Then, it sets only the final value and returns. 
+
 It roughly desugars like this:
 ```odin
-foo := bar() or_return
-
-// for booleans
-foo, ok := bar()
-if !ok do return ok
-
-// for nilables
-foo, err := bar()
-if err != nil do return err
+foo :: proc() -> (_x: int, _err: Error) {
+	val := bar() or_return
+	
+	// for booleans
+	val, ok := bar()
+	if !ok {
+		_err = ok
+		return
+	}
+	
+	// for nilables
+	val, err := bar()
+	if err != nil {
+		_err = err
+		return
+	}
+}
 ```
 
 There is no way to configure what is returned, it always propagates from the expression attached to it.
