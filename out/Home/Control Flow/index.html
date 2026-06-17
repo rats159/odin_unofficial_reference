@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<head>
+    <style>body {
+    display: flex;
+    background-color: #111;
+    font-family: sans-serif;
+    color: #ccc;
+    gap:1em;
+    margin: 1em;
+    min-height: calc(100dvh - 2em);
+    justify-content: center;
+}
+
+code {
+    font-family: "JetBrains Mono NL", monospace;
+}
+
+pre {
+    width: fit-content;
+    padding: 1em;
+    border-radius: 1em;
+    line-height: 1.25em;
+    white-space: pre-wrap;
+    background-color: #1e1e1e;
+    color: #bbbbbb;
+}
+
+:not(pre) > code {
+    background-color: #1e1e1e;
+    padding: 0.125em;
+}
+
+h1 {
+    font-size: 3em;
+    margin: 0;
+}
+h1, h2, h3 {
+    margin-left: -1rem;
+}
+
+em {
+    text-decoration: underline;
+}
+
+aside {
+    min-width: max-content;
+    padding: 1em;
+    background-color: #222;
+}
+
+main {
+    padding: 1em 1em 1em 2em;
+    background-color: #222;
+    width: 120ch;
+}
+
+.keyword {
+    color: #cf8e6d;
+}
+
+.type {
+    color: #6fafbd
+}
+
+.constant {
+    color: #c77dbb
+}
+
+.string {
+    color: #6aab73
+}
+
+.number {
+    color: #2aacb8
+}
+
+.comment {
+    color: #7a7e85
+}
+
+.call {
+    color: #56a8f5
+}
+
+a {
+    color: cornflowerblue;
+    &:visited {
+        color:#dba3ed;
+    }
+}</style>
+</head>
+<body>
+    <aside>
+    <a href="/">Home</a>
+<ul>
+<li>
+<a href="/Control Flow/">Control Flow</a>
+<ul>
+<li>
+<a href="/Control Flow/If Statements/">If Statements</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Control Flow/Loops/">Loops</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Control Flow/Switch Statements/">Switch Statements</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<span>Misc</span>
+<ul>
+<li>
+<a href="/Misc/Context/">Context</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Optional-Ok Semantics/">Optional-Ok Semantics</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Shadowing/">Shadowing</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Transmute/">Transmute</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Using/">Using</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Misc/Zero Values/">Zero Values</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="/Procedures/">Procedures</a>
+<ul>
+<li>
+<a href="/Procedures/Builtin Procedures/">Builtin Procedures</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="/Reflection/">Reflection</a>
+<ul>
+<li>
+<a href="/Reflection/Any/">Any</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="/Types/">Types</a>
+<ul>
+<li>
+<a href="/Types/Arrays/">Arrays</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Bit Sets/">Bit Sets</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Builtin Types/">Builtin Types</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Dynamic Arrays/">Dynamic Arrays</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Enumerated Arrays/">Enumerated Arrays</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Enums/">Enums</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Maps/">Maps</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Parametric Polymorphism/">Parametric Polymorphism</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Pointers/">Pointers</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Procedures/">Procedures</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Slices/">Slices</a>
+<ul>
+</ul>
+</li>
+<li>
+<a href="/Types/Unions/">Unions</a>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </aside>
+    <main>
+    <h1 id="control-flow">Control Flow</h1><p>Odin has a lot of control flow features. For the constructs themselves, see <a href="/Control%20Flow/If%20Statements">If Statements</a>, <a href="/Control%20Flow/Switch%20Statements">Switch Statements</a>, and <a href="/Control%20Flow/Loops">Loops</a>.</p><h2 id="break">Break</h2><p>A lone <code>break</code> will break one level out of a loop or a switch statement. You can also provide a <a href="/Misc/Labels">Label</a>, which allows you to break out of any block, including if statements and <a href="/Misc/Blocks">standalone Blocks</a>.</p><h2 id="or_break">or_break</h2><p>The <code>or_break</code> keyword is a postfix operator. It takes a multi-valued expression, the last of which is either a <a href="/Types/#nilable-types">nilable type</a> or a <a href="/Types/Builtin%20Types/#booleans">Boolean type</a>, and breaks if that value is non-nil or false.</p><p>It roughly desugars like this:</p><pre><code>foo := bar() or_break
+
+// for booleans
+foo, ok := bar()
+if !ok do break
+
+// for nilables
+foo, err := bar()
+if err != nil do break
+</code></pre><h2 id="continue">Continue</h2><p>A lone <code>continue</code> will skip to the next ieration of the containing loop. You can also provide a <a href="/Misc/Labels">Label</a>, which allows you to skip to the next iteration of loops other than the innermost one.</p><h2 id="or_continue">or_continue</h2><p>The <code>or_continue</code> keyword is a postfix operator. It takes a multi-valued expression, the last of which is either a <a href="/Types/#nilable-types">nilable type</a> or a <a href="/Types/Builtin%20Types/#booleans">Boolean type</a>, and continues if that value is non-nil or false.</p><p>It roughly desugars like this:</p><pre><code>foo := bar() or_continue
+
+// for booleans
+foo, ok := bar()
+if !ok do continue
+
+// for nilables
+foo, err := bar()
+if err != nil do continue
+</code></pre><h2 id="fallthrough">Fallthrough</h2><p>The <code>fallthrough</code> keyword prevents the implicit <code>break</code> at the end of every <code>case</code> inside a switch statement.</p><p>Example:</p><pre><code>do_switch :: proc(x: int) {
+	switch x {
+		case 1:
+			fmt.println("One",x)
+			fallthrough
+		case 2:
+			fmt.println("Two",x)
+			fallthrough
+		case 3:
+			fmt.println("Three",x)
+			fallthrough
+		case:
+			fmt.println("Other", x)
+	}
+}
+do_switch(1)
+fmt.println()
+do_switch(2)
+fmt.println()
+do_switch(3)
+fmt.println()
+do_switch(4)
+</code></pre><p>Output:</p><pre><code>One 1
+Two 1
+Three 1
+Other 1
+
+Two 2
+Three 2
+Other 2
+
+Three 3
+Other 3
+
+Other 4
+</code></pre><h2 id="return">Return</h2><p>The <code>return</code> keyword exits from the current procedure. You can return any number of values from a procedure. See <a href="/Procedures">Procedures</a> for more info.</p><h2 id="or_return">or_return</h2><p>The <code>or_return</code> keyword is a postfix operator. It takes a multi-valued expression, the last of which is either a <a href="/Types/#nilable-types">nilable type</a> or a <a href="/Types/Builtin%20Types/#booleans">Boolean type</a>, and returns if that value is non-nil or false.</p><p>It roughly desugars like this:</p><pre><code>foo := bar() or_return
+
+// for booleans
+foo, ok := bar()
+if !ok do return ok
+
+// for nilables
+foo, err := bar()
+if err != nil do return err
+</code></pre><p>There is no way to configure what is returned, it always propagates from the expression attached to it.</p><h2 id="or_else">or_else</h2><p>The <code>or_else</code> keyword is a binary operator. It takes an n-valued expression on the left, the last of which is either a <a href="/Types/#nilable-types">nilable type</a> or a <a href="/Types/Builtin%20Types/#booleans">Boolean type</a>, and another n-1 valued expression, and evaluates to the first expression if the last value is nil or true, otherwise the second expression.</p><p>It roughly desugars like this:</p><pre><code>foo := bar() or_else 10
+
+// for booleans
+foo, ok := bar()
+if !ok do foo = 10
+
+// for nilables
+foo, err := bar()
+if err != nil do foo = 10
+</code></pre><p>All of the <code>or_*</code> keywords also work with expressions with optional-ok semantics, such as map accesses or <a href="/Types/Union#type-assertions">union type assertions</a>.</p>
+    </main>
+</body>
