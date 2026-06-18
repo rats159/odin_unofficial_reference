@@ -237,6 +237,29 @@ a {
 
     </aside>
     <main>
-    <h1 id="shadowing">Shadowing</h1><p>TODO</p>
+    <h1 id="shadowing">Shadowing</h1><p>You're able to declare a variable with the same name as an already existing variable, so long as that variable is from a higher scope. This is called shadowing, because the higher-scoped variable is hidden "in the shadow" of the lower-scoped variable. There are some cases in Odin where shadowing is incredibly useful, and often required.</p><p>Basic example:</p><pre><code>main :: proc() {
+    x := 1
+    {
+        x := 2
+        // This affects the inner scope only
+        x += 1
+    }
+    assert(x == 1)
+}
+</code></pre><p>The most common time you'll actually use shadowing is when you have something that doesn't work quite like a variable, but you want it to. In these cases, you'll usually shadow a variable with its outer-scope version, like <code>x := x</code>.</p><p>You can compile with the <code>-vet-shadowing</code> flag, which will give you errors about all shadowing, except shadowing that reassigns to the exact same name, like <code>x := x</code>.</p><h2 id="procedure-parameters">Procedure parameters</h2><p>Procedure parameters have some <a href="/Procedures/#parameter-rules">special rules</a>, which prevent addressing and assignment. If you need to modify or address one of these parameters, shadowing is the right answer.</p><pre><code>process :: proc(a, b: int) -> int {
+    a := a // now we have a copy we can modify
+    a += b
+    a *= b
+    a -= b
+    a /= b
+    return a
+}
+</code></pre><h2 id="loop-variables">Loop variables</h2><p>Loop variables have the same rules as procedure parameters:</p><pre><code>for item in my_slice {
+    item := item
+    item.x += 3
+    item.y /= 4
+    do_something(&item)
+}
+</code></pre>
     </main>
 </body>
